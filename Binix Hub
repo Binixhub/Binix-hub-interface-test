@@ -1,0 +1,376 @@
+# Binix-hub-interface-testlocal Players          = game:GetService("Players")
+local TweenService     = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService       = game:GetService("RunService")
+
+local LP = Players.LocalPlayer
+if not LP then LP = Players.PlayerAdded:Wait() end
+
+local guiParent
+pcall(function()
+    if gethui then guiParent = gethui()
+    else
+        local ok,cg = pcall(function() return game:GetService("CoreGui") end)
+        guiParent = ok and cg or LP.PlayerGui
+    end
+end)
+if not guiParent then guiParent = LP.PlayerGui end
+
+pcall(function()
+    local old = guiParent:FindFirstChild("BinixHub")
+    if old then old:Destroy() end
+end)
+
+-- =========================================================
+--  GUI
+-- =========================================================
+local W, H = 370, 290
+
+local SG = Instance.new("ScreenGui")
+SG.Name = "BinixHub"; SG.ResetOnSpawn = false
+SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SG.IgnoreGuiInset = true; SG.Parent = guiParent
+
+local MainFrame = Instance.new("Frame", SG)
+MainFrame.Name = "Main"; MainFrame.Size = UDim2.new(0,W,0,H)
+MainFrame.Position = UDim2.new(0.5,-(W/2),0.5,-(H/2))
+MainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MainFrame.BackgroundTransparency = 0.35; MainFrame.BorderSizePixel = 0
+MainFrame.Visible = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,10)
+local mfS = Instance.new("UIStroke", MainFrame)
+mfS.Color = Color3.fromRGB(35,35,35); mfS.Thickness = 2
+
+-- TopBar
+local TB = Instance.new("Frame", MainFrame)
+TB.Size = UDim2.new(1,0,0,36); TB.BackgroundColor3 = Color3.fromRGB(0,0,0)
+TB.BackgroundTransparency = 0.3; TB.BorderSizePixel = 0
+Instance.new("UICorner", TB).CornerRadius = UDim.new(0,10)
+local tbFix = Instance.new("Frame", TB)
+tbFix.Size = UDim2.new(1,0,0,10); tbFix.Position = UDim2.new(0,0,1,-10)
+tbFix.BackgroundColor3 = Color3.fromRGB(0,0,0); tbFix.BackgroundTransparency = 0.3; tbFix.BorderSizePixel = 0
+
+local TitleLbl = Instance.new("TextLabel", TB)
+TitleLbl.Size = UDim2.new(0,160,1,0); TitleLbl.Position = UDim2.new(0,10,0,0)
+TitleLbl.BackgroundTransparency = 1; TitleLbl.Text = "BINIX HUB"
+TitleLbl.TextColor3 = Color3.fromRGB(255,255,255); TitleLbl.TextSize = 15
+TitleLbl.Font = Enum.Font.GothamBold; TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+local BetaBadge = Instance.new("TextLabel", TB)
+BetaBadge.Size = UDim2.new(0,50,0,16); BetaBadge.Position = UDim2.new(0,116,0.5,-8)
+BetaBadge.BackgroundColor3 = Color3.fromRGB(18,18,18); BetaBadge.BackgroundTransparency = 0.2
+BetaBadge.Text = "[BETA]"; BetaBadge.TextColor3 = Color3.fromRGB(110,110,110)
+BetaBadge.TextSize = 9; BetaBadge.Font = Enum.Font.GothamBold; BetaBadge.BorderSizePixel = 0
+Instance.new("UICorner", BetaBadge).CornerRadius = UDim.new(0,4)
+
+local MinBtn = Instance.new("TextButton", TB)
+MinBtn.Size = UDim2.new(0,26,0,26); MinBtn.Position = UDim2.new(1,-62,0.5,-13)
+MinBtn.BackgroundColor3 = Color3.fromRGB(12,12,12); MinBtn.BackgroundTransparency = 0.2
+MinBtn.Text = "-"; MinBtn.TextColor3 = Color3.fromRGB(170,170,170)
+MinBtn.Font = Enum.Font.GothamBold; MinBtn.TextSize = 16; MinBtn.BorderSizePixel = 0
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UIStroke", MinBtn).Color = Color3.fromRGB(50,50,50)
+
+local CloseBtn = Instance.new("TextButton", TB)
+CloseBtn.Size = UDim2.new(0,26,0,26); CloseBtn.Position = UDim2.new(1,-32,0.5,-13)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(12,12,12); CloseBtn.BackgroundTransparency = 0.2
+CloseBtn.Text = "x"; CloseBtn.TextColor3 = Color3.fromRGB(170,170,170)
+CloseBtn.Font = Enum.Font.GothamBold; CloseBtn.TextSize = 18; CloseBtn.BorderSizePixel = 0
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0,6)
+Instance.new("UIStroke", CloseBtn).Color = Color3.fromRGB(50,50,50)
+
+-- SideBar
+local SideBar = Instance.new("ScrollingFrame", MainFrame)
+SideBar.Size = UDim2.new(0,88,1,-40); SideBar.Position = UDim2.new(0,0,0,38)
+SideBar.BackgroundColor3 = Color3.fromRGB(0,0,0); SideBar.BackgroundTransparency = 0.5; SideBar.BorderSizePixel = 0
+SideBar.ScrollBarThickness = 0; SideBar.CanvasSize = UDim2.new(0,0,0,0)
+SideBar.AutomaticCanvasSize = Enum.AutomaticSize.Y; SideBar.ScrollingDirection = Enum.ScrollingDirection.Y
+Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0,8)
+local sbL = Instance.new("UIListLayout", SideBar); sbL.Padding = UDim.new(0,4)
+local sbP = Instance.new("UIPadding", SideBar)
+sbP.PaddingTop = UDim.new(0,6); sbP.PaddingLeft = UDim.new(0,5); sbP.PaddingRight = UDim.new(0,5)
+
+local Div = Instance.new("Frame", MainFrame)
+Div.Size = UDim2.new(0,1,1,-44); Div.Position = UDim2.new(0,90,0,40)
+Div.BackgroundColor3 = Color3.fromRGB(38,38,38); Div.BackgroundTransparency = 0.3; Div.BorderSizePixel = 0
+
+-- Tab system
+local tabContents = {}
+local function makeTabContent(name)
+    local sf = Instance.new("ScrollingFrame", MainFrame)
+    sf.Name = "C_"..name; sf.Size = UDim2.new(1,-98,1,-44); sf.Position = UDim2.new(0,94,0,40)
+    sf.BackgroundTransparency = 1; sf.BorderSizePixel = 0
+    sf.ScrollBarThickness = 3; sf.ScrollBarImageColor3 = Color3.fromRGB(50,50,50)
+    sf.CanvasSize = UDim2.new(0,0,0,0); sf.AutomaticCanvasSize = Enum.AutomaticSize.Y; sf.Visible = false
+    local cl = Instance.new("UIListLayout", sf); cl.Padding = UDim.new(0,5)
+    local cp = Instance.new("UIPadding", sf)
+    cp.PaddingTop = UDim.new(0,5); cp.PaddingLeft = UDim.new(0,2); cp.PaddingRight = UDim.new(0,4)
+    tabContents[name] = sf; return sf
+end
+
+local activeTab = ""
+local allTabs = {}
+local _tti = TweenInfo.new(0.15, Enum.EasingStyle.Quad)
+
+local function makeSideTab(name, order)
+    local btn = Instance.new("TextButton", SideBar)
+    btn.Size = UDim2.new(1,0,0,34); btn.LayoutOrder = order
+    btn.BackgroundColor3 = Color3.fromRGB(10,10,10); btn.BackgroundTransparency = 0.3
+    btn.TextColor3 = Color3.fromRGB(110,110,110); btn.Text = name
+    btn.Font = Enum.Font.GothamBold; btn.TextSize = 12; btn.BorderSizePixel = 0
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,7)
+    local ind = Instance.new("Frame", btn)
+    ind.Size = UDim2.new(0,0,0.6,0); ind.Position = UDim2.new(0,0,0.2,0)
+    ind.BackgroundColor3 = Color3.fromRGB(200,200,200); ind.BorderSizePixel = 0
+    Instance.new("UICorner", ind).CornerRadius = UDim.new(1,0)
+    table.insert(allTabs, {btn=btn, ind=ind, name=name}); return btn
+end
+
+local function setTab(t)
+    activeTab = t
+    for _,d in ipairs(allTabs) do
+        if d.name == t then
+            TweenService:Create(d.btn,_tti,{BackgroundColor3=Color3.fromRGB(22,22,22),TextColor3=Color3.fromRGB(255,255,255)}):Play()
+            TweenService:Create(d.ind,TweenInfo.new(0.2,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=UDim2.new(0,4,0.6,0)}):Play()
+        else
+            TweenService:Create(d.btn,_tti,{BackgroundColor3=Color3.fromRGB(10,10,10),TextColor3=Color3.fromRGB(110,110,110)}):Play()
+            TweenService:Create(d.ind,_tti,{Size=UDim2.new(0,0,0.6,0)}):Play()
+        end
+    end
+    for name,sf in pairs(tabContents) do
+        if name == t then
+            sf.Visible = true
+            sf.Position = UDim2.new(0,100,0,40)
+            TweenService:Create(sf,TweenInfo.new(0.18,Enum.EasingStyle.Quad),{Position=UDim2.new(0,94,0,40)}):Play()
+        else
+            sf.Visible = false
+        end
+    end
+end
+
+-- =========================================================
+--  UI HELPERS
+-- =========================================================
+local _ti = TweenInfo.new(0.15, Enum.EasingStyle.Quad)
+
+local function makeToggle(parent, label, callback)
+    local row = Instance.new("Frame", parent)
+    row.Size = UDim2.new(1,0,0,36); row.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    row.BackgroundTransparency = 0.45; row.BorderSizePixel = 0
+    Instance.new("UICorner", row).CornerRadius = UDim.new(0,7)
+    local rs = Instance.new("UIStroke", row); rs.Color = Color3.fromRGB(32,32,32); rs.Thickness = 1
+    local lbl = Instance.new("TextLabel", row)
+    lbl.Size = UDim2.new(1,-56,1,0); lbl.Position = UDim2.new(0,10,0,0)
+    lbl.BackgroundTransparency = 1; lbl.Text = label
+    lbl.TextColor3 = Color3.fromRGB(205,205,205); lbl.TextSize = 12
+    lbl.Font = Enum.Font.GothamBold; lbl.TextXAlignment = Enum.TextXAlignment.Left
+    local pill = Instance.new("Frame", row)
+    pill.Size = UDim2.new(0,40,0,21); pill.Position = UDim2.new(1,-48,0.5,-10)
+    pill.BackgroundColor3 = Color3.fromRGB(26,26,26); pill.BorderSizePixel = 0
+    Instance.new("UICorner", pill).CornerRadius = UDim.new(1,0)
+    Instance.new("UIStroke", pill).Color = Color3.fromRGB(50,50,50)
+    local knob = Instance.new("Frame", pill)
+    knob.Size = UDim2.new(0,15,0,15); knob.Position = UDim2.new(0,3,0.5,-7)
+    knob.BackgroundColor3 = Color3.fromRGB(85,85,85); knob.BorderSizePixel = 0
+    Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+    local state = false
+    local btn = Instance.new("TextButton", row)
+    btn.Size = UDim2.new(1,0,1,0); btn.BackgroundTransparency = 1; btn.Text = ""; btn.ZIndex = 5
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        if state then
+            TweenService:Create(knob,_ti,{Position=UDim2.new(0,22,0.5,-7),BackgroundColor3=Color3.fromRGB(255,255,255)}):Play()
+            TweenService:Create(pill,_ti,{BackgroundColor3=Color3.fromRGB(38,38,38)}):Play()
+            TweenService:Create(rs,_ti,{Color=Color3.fromRGB(85,85,85)}):Play()
+            TweenService:Create(lbl,_ti,{TextColor3=Color3.fromRGB(255,255,255)}):Play()
+        else
+            TweenService:Create(knob,_ti,{Position=UDim2.new(0,3,0.5,-7),BackgroundColor3=Color3.fromRGB(85,85,85)}):Play()
+            TweenService:Create(pill,_ti,{BackgroundColor3=Color3.fromRGB(26,26,26)}):Play()
+            TweenService:Create(rs,_ti,{Color=Color3.fromRGB(32,32,32)}):Play()
+            TweenService:Create(lbl,_ti,{TextColor3=Color3.fromRGB(205,205,205)}):Play()
+        end
+        callback(state)
+    end)
+end
+
+local function makeButton(parent, label, callback)
+    local row = Instance.new("TextButton", parent)
+    row.Size = UDim2.new(1,0,0,36); row.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    row.BackgroundTransparency = 0.45; row.BorderSizePixel = 0
+    row.Text = label; row.TextColor3 = Color3.fromRGB(205,205,205)
+    row.Font = Enum.Font.GothamBold; row.TextSize = 12
+    Instance.new("UICorner", row).CornerRadius = UDim.new(0,7)
+    local rs = Instance.new("UIStroke", row); rs.Color = Color3.fromRGB(32,32,32); rs.Thickness = 1
+    row.MouseButton1Click:Connect(callback)
+    return row
+end
+
+local function makeSlider(parent, label, default, min, max, callback)
+    local row = Instance.new("Frame", parent)
+    row.Size = UDim2.new(1,0,0,50); row.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    row.BackgroundTransparency = 0.45; row.BorderSizePixel = 0
+    Instance.new("UICorner", row).CornerRadius = UDim.new(0,7)
+    Instance.new("UIStroke", row).Color = Color3.fromRGB(32,32,32)
+    local lbl = Instance.new("TextLabel", row)
+    lbl.Size = UDim2.new(1,-50,0,16); lbl.Position = UDim2.new(0,10,0,5)
+    lbl.BackgroundTransparency = 1; lbl.Text = label
+    lbl.TextColor3 = Color3.fromRGB(195,195,195); lbl.TextSize = 12
+    lbl.Font = Enum.Font.GothamBold; lbl.TextXAlignment = Enum.TextXAlignment.Left
+    local valLbl = Instance.new("TextLabel", row)
+    valLbl.Size = UDim2.new(0,42,0,16); valLbl.Position = UDim2.new(1,-48,0,5)
+    valLbl.BackgroundTransparency = 1; valLbl.Text = tostring(default)
+    valLbl.TextColor3 = Color3.fromRGB(155,155,155); valLbl.TextSize = 12
+    valLbl.Font = Enum.Font.GothamBold; valLbl.TextXAlignment = Enum.TextXAlignment.Right
+    local track = Instance.new("Frame", row)
+    track.Size = UDim2.new(1,-20,0,5); track.Position = UDim2.new(0,10,0,34)
+    track.BackgroundColor3 = Color3.fromRGB(22,22,22); track.BorderSizePixel = 0
+    Instance.new("UICorner", track).CornerRadius = UDim.new(1,0)
+    local p2 = (default-min)/(max-min)
+    local fill = Instance.new("Frame", track); fill.Size = UDim2.new(p2,0,1,0)
+    fill.BackgroundColor3 = Color3.fromRGB(165,165,165); fill.BorderSizePixel = 0
+    Instance.new("UICorner", fill).CornerRadius = UDim.new(1,0)
+    local knob = Instance.new("Frame", track)
+    knob.Size = UDim2.new(0,12,0,12); knob.AnchorPoint = Vector2.new(0.5,0)
+    knob.Position = UDim2.new(p2,0,0.5,-6); knob.BackgroundColor3 = Color3.fromRGB(205,205,205); knob.BorderSizePixel = 0
+    Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+    local dragging = false
+    knob.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=true end end)
+    UserInputService.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragging=false end end)
+    UserInputService.InputChanged:Connect(function(i)
+        if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
+            local abs=track.AbsolutePosition; local sz=track.AbsoluteSize
+            local rel=math.clamp((i.Position.X-abs.X)/sz.X,0,1)
+            local val=math.floor(min+rel*(max-min))
+            fill.Size=UDim2.new(rel,0,1,0); knob.Position=UDim2.new(rel,0,0.5,-6)
+            valLbl.Text=tostring(val); callback(val)
+        end
+    end)
+end
+
+local function makeSep(parent, text)
+    local lbl = Instance.new("TextLabel", parent)
+    lbl.Size = UDim2.new(1,0,0,16); lbl.BackgroundTransparency = 1
+    lbl.Text = "  "..text; lbl.TextColor3 = Color3.fromRGB(65,65,65)
+    lbl.TextSize = 10; lbl.Font = Enum.Font.GothamBold; lbl.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+-- =========================================================
+--  TABS
+-- =========================================================
+local tabMainBtn = makeSideTab("Binix Hub", 0)
+local cMain      = makeTabContent("Binix Hub")
+
+tabMainBtn.MouseButton1Click:Connect(function() setTab("Binix Hub") end)
+
+-- =========================================================
+--  CONTEUDO TAB MAIN
+-- =========================================================
+makeSep(cMain, "Bem vindo")
+
+-- Label de boas vindas
+local welcomeRow = Instance.new("Frame", cMain)
+welcomeRow.Size = UDim2.new(1,0,0,60)
+welcomeRow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+welcomeRow.BackgroundTransparency = 0.45
+welcomeRow.BorderSizePixel = 0
+Instance.new("UICorner", welcomeRow).CornerRadius = UDim.new(0,7)
+Instance.new("UIStroke", welcomeRow).Color = Color3.fromRGB(32,32,32)
+
+local welcomeLbl = Instance.new("TextLabel", welcomeRow)
+welcomeLbl.Size = UDim2.new(1,-10,1,0)
+welcomeLbl.Position = UDim2.new(0,10,0,0)
+welcomeLbl.BackgroundTransparency = 1
+welcomeLbl.Text = "Bem vindo ao Binix Hub!\nSintonia RP"
+welcomeLbl.TextColor3 = Color3.fromRGB(200,200,200)
+welcomeLbl.TextSize = 13
+welcomeLbl.Font = Enum.Font.GothamBold
+welcomeLbl.TextXAlignment = Enum.TextXAlignment.Left
+welcomeLbl.TextWrapped = true
+
+makeSep(cMain, "Info")
+
+-- Label de versao
+local verRow = Instance.new("Frame", cMain)
+verRow.Size = UDim2.new(1,0,0,36)
+verRow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+verRow.BackgroundTransparency = 0.45
+verRow.BorderSizePixel = 0
+Instance.new("UICorner", verRow).CornerRadius = UDim.new(0,7)
+Instance.new("UIStroke", verRow).Color = Color3.fromRGB(32,32,32)
+
+local verLbl = Instance.new("TextLabel", verRow)
+verLbl.Size = UDim2.new(1,-10,1,0)
+verLbl.Position = UDim2.new(0,10,0,0)
+verLbl.BackgroundTransparency = 1
+verLbl.Text = "Versao: BETA  |  by: Binix Hub"
+verLbl.TextColor3 = Color3.fromRGB(150,150,150)
+verLbl.TextSize = 11
+verLbl.Font = Enum.Font.Gotham
+verLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+makeSep(cMain, "Discord")
+
+local dcRow = Instance.new("Frame", cMain)
+dcRow.Size = UDim2.new(1,0,0,36)
+dcRow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+dcRow.BackgroundTransparency = 0.45
+dcRow.BorderSizePixel = 0
+Instance.new("UICorner", dcRow).CornerRadius = UDim.new(0,7)
+Instance.new("UIStroke", dcRow).Color = Color3.fromRGB(32,32,32)
+
+local dcLbl = Instance.new("TextLabel", dcRow)
+dcLbl.Size = UDim2.new(1,-10,1,0)
+dcLbl.Position = UDim2.new(0,10,0,0)
+dcLbl.BackgroundTransparency = 1
+dcLbl.Text = "ttk: binix.hub"
+dcLbl.TextColor3 = Color3.fromRGB(150,150,150)
+dcLbl.TextSize = 11
+dcLbl.Font = Enum.Font.Gotham
+dcLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+-- =========================================================
+--  DRAG
+-- =========================================================
+do
+    local drag,ds,sp = false,nil,nil
+    TB.InputBegan:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+            drag=true; ds=i.Position; sp=MainFrame.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(i)
+        if drag and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
+            local d=i.Position-ds
+            MainFrame.Position=UDim2.new(sp.X.Scale,sp.X.Offset+d.X,sp.Y.Scale,sp.Y.Offset+d.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function() drag=false end)
+end
+
+-- =========================================================
+--  MINIMIZAR / FECHAR
+-- =========================================================
+local minimized = false
+MinBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        TweenService:Create(MainFrame,TweenInfo.new(0.2,Enum.EasingStyle.Quart),{Size=UDim2.new(0,W,0,36)}):Play()
+        SideBar.Visible=false; Div.Visible=false
+        for _,sf in pairs(tabContents) do sf.Visible=false end
+        MinBtn.Text="+"
+    else
+        TweenService:Create(MainFrame,TweenInfo.new(0.2,Enum.EasingStyle.Quart),{Size=UDim2.new(0,W,0,H)}):Play()
+        SideBar.Visible=true; Div.Visible=true
+        for name,sf in pairs(tabContents) do sf.Visible=(name==activeTab) end
+        MinBtn.Text="-"
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    SG:Destroy()
+end)
+
+-- Abre no tab Main
+setTab("Binix Hub")
+
+print("[BINIX HUB] Carregado!")

@@ -1,1 +1,0 @@
-# Binix-hub-interface-test
